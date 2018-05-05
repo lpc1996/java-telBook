@@ -1,0 +1,537 @@
+package iframe;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.nio.charset.MalformedInputException;
+import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+
+
+import data.Dao;
+import data.TableData;
+import javafx.scene.layout.Border;
+import model.Record;
+
+public class MainIframe extends JFrame{
+	
+	private JPanel mainPanel;
+	private JPanel bottomPanel;
+	private JMenuBar mainMenu;
+	private JFrame frame;
+	private JTextField numberText;
+	private JTextField nameText;
+	private JTextField telText;
+	private JButton btn1;
+	private JButton btn2;
+	private JButton btn3;
+	private Record rec;
+	private JPanel mainTopPanel;
+	public MainIframe() {
+		frame = new JFrame("通讯录");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		Toolkit tool = Toolkit.getDefaultToolkit();
+		Dimension screenSize = tool.getScreenSize();
+				
+		frame.setLocation((int)(screenSize.width - frame.getSize().getWidth()) / 2, (int)(screenSize.height - frame.getSize().getHeight()) / 2);
+//		frame.setResizable(false);
+		BorderLayout borderLayout = new BorderLayout();
+		frame.setLayout(new GridLayout(0,1));
+		frame.setSize(600, 600);
+		frame.setMinimumSize(new Dimension(808, 700));
+		frame.pack();
+		frame.setVisible(true);
+		
+	}
+	
+	private void createMainMenu() {
+		mainMenu = new JMenuBar();
+		JMenu baseMenu = new JMenu("菜单");
+		JMenuItem printMenuItem = new JMenuItem("显示所有记录");
+		printMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO 自动生成的方法存根
+				printPanel();
+			}
+		});
+		JMenuItem addMenuItem = new JMenuItem("添加记录");
+		addMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				AddPanel();
+			}
+		});
+		
+		JMenuItem changeMenuItem = new JMenuItem("修改记录");
+		changeMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				changePanel();
+			}
+		});
+		JMenuItem dropMenuItem = new JMenuItem("删除记录");
+		dropMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				deletePanel();
+			}
+		});
+		JMenuItem searchMenuItem = new JMenuItem("查询");
+		searchMenuItem.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				searchPanel();
+			}
+		});
+		
+		baseMenu.add(printMenuItem);
+		baseMenu.add(addMenuItem);
+		baseMenu.add(changeMenuItem);
+		baseMenu.add(dropMenuItem);
+		baseMenu.add(searchMenuItem);
+		mainMenu.add(baseMenu);
+	}
+	
+	private void printPanel() {
+		mainTopPanel.removeAll();
+		mainPanel.removeAll();
+		bottomPanel.removeAll();
+		mainTopPanel.setLayout(new BorderLayout());
+		mainTopPanel.add(getTableData());
+		mainTopPanel.setPreferredSize(new Dimension(300,100));
+		
+		btn1 = new JButton("关闭");
+		bottomPanel.add(btn1);
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+		btn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO 自动生成的方法存根
+				mainTopPanel.removeAll();
+				mainPanel.removeAll();
+				bottomPanel.removeAll();
+				mainTopPanel.updateUI();
+				mainPanel.updateUI();
+				bottomPanel.updateUI();
+				
+			}
+		});
+	}
+	
+	private JScrollPane getTableData() {
+		JTable table = new JTable(new TableData());
+		JScrollPane js = new JScrollPane(table);
+		return js;
+	}
+	
+	public void createJFrame() {
+		createMainMenu();
+		frame.setJMenuBar(mainMenu);
+		mainTopPanel = new JPanel();
+		mainPanel = new JPanel();
+		mainPanel.setLayout(null);
+		mainPanel.setMinimumSize(new Dimension(250, 250));
+		frame.add(mainTopPanel);
+		frame.add(mainPanel);
+		bottomPanel = new JPanel();
+		frame.add(bottomPanel);
+		mainTopPanel.updateUI();
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+//		printPanel();
+	}
+	
+	
+	private void AddPanel() {
+		mainTopPanel.removeAll();
+		mainPanel.removeAll();
+		bottomPanel.removeAll();
+		mainTopPanel.add(getTableData());
+		mainTopPanel.setPreferredSize(new Dimension(300,100));
+		GridLayout gridLayout = new GridLayout(0, 2);
+		mainPanel.setLayout(gridLayout);
+		gridLayout.setHgap(5);
+		gridLayout.setVgap(20);
+		JLabel numberLab = new JLabel("序号:");
+		numberText = new JTextField();
+		JLabel nameLab = new JLabel("姓名:");
+		nameText = new JTextField();
+		JLabel telLab = new JLabel("电话:");
+		telText = new JTextField();
+		
+		mainPanel.add(numberLab);
+		mainPanel.add(numberText);
+		mainPanel.add(nameLab);
+		mainPanel.add(nameText);
+		mainPanel.add(telLab);
+		mainPanel.add(telText);
+		mainPanel.updateUI();
+		
+		btn1 = new JButton("添加");
+		bottomPanel.add(btn1);
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+		btn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				int i = addData();
+				if(i == -1) {
+					errPanel("添加失败");
+					numberText.setText("");
+					nameText.setText("");
+					telText.setText("");
+				}else if (i == 0){
+					numberText.setText("");
+					nameText.setText("");
+					telText.setText("");
+				}else {
+					errPanel("添加成功");
+				}
+			}
+		});
+		
+		btn2 = new JButton("关闭");
+		bottomPanel.add(btn2);
+		btn2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				mainTopPanel.removeAll();
+				mainPanel.removeAll();
+				bottomPanel.removeAll();
+				mainTopPanel.updateUI();
+				mainPanel.updateUI();
+				bottomPanel.updateUI();
+			}
+		});
+	}
+	
+	private int addData() {
+		int i = 0;
+		Record rec = new Record();
+		if(numberText.getText().equals("") || nameText.getText().equals("") ||telText.getText().equals("")) {
+			errPanel("请输入数据");
+			return 0;
+		}
+		try {
+			rec.setId(Integer.parseInt(numberText.getText()));
+		} catch (Exception e) {
+			// TODO: handle exception
+			errPanel("请输入整数！");
+			numberText.setText("");
+			nameText.setText("");
+			telText.setText("");
+			return 0;
+		}
+		rec.setName(nameText.getText());
+		String str = "\\d{11}";
+		if(telText.getText().matches(str)) {
+			rec.setTel(telText.getText());
+		}else {
+			errPanel("请输入正确的电话号码");
+			return 0;
+		}
+		Dao dao = new Dao();
+		i = dao.insertData(rec);
+		return i;
+	}
+	
+	private void changePanel() {
+		mainTopPanel.removeAll();
+		mainPanel.removeAll();
+		bottomPanel.removeAll();
+		JPanel changePanel = new JPanel();
+		Record rec = new Record();
+		TableData tableData = new TableData();
+		
+		mainPanel.setLayout(new BorderLayout());
+		JTable table = new JTable(new TableData());
+		JScrollPane js = new JScrollPane(table);
+//		Dimension jsSize = 
+		mainTopPanel.setPreferredSize(new Dimension(js.getWidth()-50, js.getHeight()*2));
+		mainTopPanel.add(js);
+		mainTopPanel.revalidate();
+		
+		JLabel numberLab = new JLabel("序号:");
+		numberText = new JTextField();
+		JLabel nameLab = new JLabel("姓名:");
+		nameText = new JTextField();
+		JLabel telLab = new JLabel("电话:");
+		telText = new JTextField();
+		GridLayout gridlayout = new GridLayout(0, 2);
+		mainPanel.setLayout(gridlayout);
+		mainPanel.add(numberLab);
+		mainPanel.add(numberText);
+		mainPanel.add(nameLab);
+		mainPanel.add(nameText);
+		mainPanel.add(telLab);
+		mainPanel.add(telText);
+		table.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(java.awt.event.MouseEvent arg0) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mousePressed(java.awt.event.MouseEvent arg0) {
+				// TODO 自动生成的方法存根
+				int index = table.getSelectedRow();
+				int column = table.getColumnCount();
+				for(int i = 0 ; i < column ; i++) {
+					if(i == 0)
+						rec.setId(Integer.parseInt((String)table.getValueAt(index, i)));
+					if( i == 1)
+						rec.setName((String)table.getValueAt(index, i));
+					if(i == 2) {
+						rec.setTel((String)table.getValueAt(index, i));
+					}
+				}
+				numberText.setText(rec.getId()+"");
+				nameText.setText(rec.getName());
+				telText.setText(rec.getTel());
+			}
+			
+			@Override
+			public void mouseExited(java.awt.event.MouseEvent arg0) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mouseEntered(java.awt.event.MouseEvent arg0) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mouseClicked(java.awt.event.MouseEvent arg0) {
+				// TODO 自动生成的方法存根
+				
+			}
+		});
+		btn1 = new JButton("修改");
+		btn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				int i = 0;
+				Record data = new Record();
+				data.setId(Integer.parseInt(numberText.getText()));
+				data.setName(nameText.getText());
+				data.setTel(telText.getText());
+				Dao dao = new Dao();
+				i = dao.upData(rec.getId(), data);
+				if(i == -1) {
+					errPanel("修改失败");
+				}else {
+					errPanel("修改成功");
+				}
+			}
+		});
+		btn2 = new JButton("关闭");
+		btn2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				mainTopPanel.removeAll();
+				mainPanel.removeAll();
+				bottomPanel.removeAll();
+				mainTopPanel.updateUI();
+				mainPanel.updateUI();
+				bottomPanel.updateUI();
+			}
+		});
+		bottomPanel.add(btn1);
+		bottomPanel.add(btn2);
+		mainTopPanel.updateUI();
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+		
+	}
+	
+	private void deletePanel() {
+		mainTopPanel.removeAll();
+		mainPanel.removeAll();
+		bottomPanel.removeAll();
+		JTable table = new JTable(new TableData());
+		JScrollPane js = new JScrollPane(table);
+		mainTopPanel.setPreferredSize(new Dimension(js.getWidth()-20, js.getHeight()*2));
+		Record rec = new Record();
+		mainTopPanel.add(js);
+		JLabel lab = new JLabel();
+		mainPanel.add(lab);
+		
+		table.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO 自动生成的方法存根
+				int index = table.getSelectedRow();
+				int column = table.getColumnCount();
+				for(int i = 0 ; i < 3 ; i++) {
+					if(i == 0) 
+						rec.setId(Integer.parseInt((String)table.getValueAt(index, i)));
+					if(i == 1) {
+						rec.setName((String)table.getValueAt(index, i));
+					}
+					if(i == 2) {
+						rec.setTel((String)table.getValueAt(index, i));
+					}
+				}
+				StringBuffer strb = new StringBuffer();
+				String str = new String();
+				strb.append("要删除的记录是："+rec.getId()+" "+rec.getName()+" "+rec.getTel());
+				str = strb.toString();
+				lab.setText(str);
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO 自动生成的方法存根
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO 自动生成的方法存根
+				
+			}
+		});
+		btn1 = new JButton("删除");
+		btn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO 自动生成的方法存根
+				Dao dao = new Dao();
+				int i = dao.deleteData(rec);
+				if( i == -1) {
+					errPanel("删除失败");
+				}else {
+					errPanel("删除成功");
+				}
+			}
+		});
+		btn2 = new JButton("关闭");
+		btn2.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				// TODO 自动生成的方法存根
+				mainTopPanel.removeAll();
+				mainPanel.removeAll();
+				bottomPanel.removeAll();
+				mainTopPanel.updateUI();
+				mainPanel.updateUI();
+				bottomPanel.updateUI();
+			}
+		});
+		bottomPanel.add(btn1);
+		bottomPanel.add(btn2);
+		mainTopPanel.updateUI();
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+	}
+	
+	private void searchPanel() {
+		mainTopPanel.removeAll();
+		mainPanel.removeAll();
+		bottomPanel.removeAll();
+		mainTopPanel.add(getTableData());
+		nameText = new JTextField(20);
+		JPanel inputPanel = new JPanel();
+		GridLayout grid = new GridLayout(0, 1);
+//		nameText.setMinimumSize();
+		inputPanel.add(nameText);
+		mainPanel.setLayout(grid);
+		mainPanel.add(inputPanel);
+		JLabel printLab = new JLabel();
+		mainPanel.add(printLab);
+		btn1 = new JButton("查询");
+		btn1.setMaximumSize(new Dimension(14, 30));
+		btn2 = new JButton("修改");
+		btn2.setMaximumSize(new Dimension(14, 30));
+		btn3 = new JButton("删除");
+		btn3.setMaximumSize(new Dimension(14, 30));
+		bottomPanel.setLayout(new GridLayout(1, 0));
+		bottomPanel.add(btn1);
+		btn1.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				Dao dao = new Dao();
+				StringBuffer sb = new StringBuffer();
+				sb.append(nameText.getText());
+				String str = sb.toString();
+				rec = dao.searchData(str);
+				if(rec.getId() != 0) {
+					printLab.setText("找到了: "+rec.getId()+"   "+rec.getName()+"   "+rec.getTel());
+				}else {
+					printLab.setText("找不到你要的信息！");
+				}
+				mainPanel.updateUI();
+			}
+		});
+		bottomPanel.add(btn2);
+		btn2.addActionListener(new  ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO 自动生成的方法存根
+				
+			}
+		});
+		bottomPanel.add(btn3);
+		mainTopPanel.updateUI();
+		mainPanel.updateUI();
+		bottomPanel.updateUI();
+	}
+	private void errPanel(String errInfo) {
+		try {
+			JOptionPane.showMessageDialog(null, errInfo);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+}
