@@ -1,10 +1,7 @@
 package iframe;
 
-
-
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -12,7 +9,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -24,12 +20,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.WindowConstants;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-
 import data.Dao;
 import data.TableData;
-import javafx.scene.layout.Border;
 import model.Record;
 
 public class MainIframe extends JFrame{
@@ -39,8 +31,6 @@ public class MainIframe extends JFrame{
 	private JPanel bottomPanel;
 	private JButton btn1;
 	private JButton btn2;
-	private JButton btn3;
-	private JButton btn4;
 	private JTextField idText;
 	private JTextField nameText;
 	private JTextField telText;
@@ -207,6 +197,8 @@ public class MainIframe extends JFrame{
 					String telstr = "\\d{11}";
 					if(!telText.getText().matches(telstr)) {
 						errJOption("请输入正确的电话号码！");
+						telText.setText("");
+						return;
 					}
 					rec.setId(Integer.parseInt(idText.getText()));
 					rec.setName(nameText.getText());
